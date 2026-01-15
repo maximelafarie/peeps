@@ -1,0 +1,36 @@
+{
+  "name": "peeps",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "lint": "eslint src",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@tsconfig/svelte": "^5.0.6",
+    "@types/node": "^24.10.1",
+    "@types/peerjs": "^0.0.30",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "eslint": "^9.39.2",
+    "eslint-plugin-svelte": "^3.14.0",
+    "globals": "^17.0.0",
+    "svelte": "^5.43.8",
+    "svelte-check": "^4.3.4",
+    "svelte-eslint-parser": "^1.4.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
+    "@lucide/svelte": "^0.562.0",
+    "emoji-mart": "^5.6.0",
+    "peerjs": "^1.5.5"
+  }
+}
