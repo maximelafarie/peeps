@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { RichMessage, TenorResult } from "../types";
+
   interface Props {
     sender: string;
     text: string;
@@ -24,7 +26,41 @@
     });
   }
 
-  let formattedText = $derived(linkify(text));
+  function getMessageType(message: string): "gif" | "text" {
+    try {
+      const obj = JSON.parse(message);
+      if (
+        obj &&
+        obj.type === "gif" &&
+        obj.content &&
+        typeof obj.content.gif === "string"
+      ) {
+        return "gif";
+      }
+    } catch {
+      // Not JSON, treat as text
+    }
+    return "text";
+  }
+
+  function renderMessage(message: string): string {
+    const type = getMessageType(message);
+    if (type === "gif") {
+      try {
+        const obj: RichMessage<TenorResult> = JSON.parse(message);
+        const { gif, width, description } = obj.content || {};
+        if (gif) {
+          return `<img class="gif" src="${gif}" alt="${description || ""}" width="${width || ""}" />`;
+        }
+      } catch {
+        // Invalid JSON, treat as text
+      }
+    }
+
+    return linkify(message);
+  }
+
+  let formattedText = $derived(renderMessage(text));
 </script>
 
 <div class="message" class:own={isOwn} class:system={isSystem}>
@@ -64,7 +100,7 @@
     background: white;
     padding: 10px 14px;
     border-radius: 12px;
-    display: inline-block;
+    display: inline-flex;
     max-width: 80%;
     word-wrap: break-word;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -89,6 +125,11 @@
 
   .message .text :global(a:hover) {
     color: #764ba2;
+  }
+
+  :global(.message .text:has(.gif)) {
+    padding: 0;
+    overflow: hidden;
   }
 
   .message.system {

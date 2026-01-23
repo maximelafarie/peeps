@@ -2,13 +2,13 @@
   import { onDestroy } from "svelte";
   import Peer from "peerjs";
   import type { DataConnection } from "peerjs";
-  import { t, currentLanguage, setLanguage, type Language } from "./i18n";
   import ChatSetup from "./lib/ChatSetup.svelte";
   import ChatRoom from "./lib/ChatRoom.svelte";
   import LanguageSelector from "./lib/LanguageSelector.svelte";
   import ConnectionStatus from "./lib/ConnectionStatus.svelte";
   import * as cryptoUtils from "./cryptoUtils";
   import type { Status } from "./types";
+  import { t } from "./i18n";
 
   interface Message {
     id: string;
