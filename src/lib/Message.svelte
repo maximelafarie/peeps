@@ -1,4 +1,7 @@
 <script lang="ts">
+  import type { RichMessage, TenorResult } from "../types";
+  import emojiRegex from "emoji-regex-xs";
+
   interface Props {
     sender: string;
     text: string;
@@ -24,14 +27,70 @@
     });
   }
 
-  let formattedText = $derived(linkify(text));
+  function getMessageType(message: string): "gif" | "text" {
+    try {
+      const obj = JSON.parse(message);
+      if (
+        obj &&
+        obj.type === "gif" &&
+        obj.content &&
+        typeof obj.content.gif === "string"
+      ) {
+        return "gif";
+      }
+    } catch {
+      // Not JSON, treat as text
+    }
+    return "text";
+  }
+
+  function renderMessage(message: string): string {
+    const type = getMessageType(message);
+    if (type === "gif") {
+      try {
+        const obj: RichMessage<TenorResult> = JSON.parse(message);
+        const { gif, width, description } = obj.content || {};
+        if (gif) {
+          return `<img class="gif" src="${gif}" alt="${description || ""}" width="${width || ""}" />`;
+        }
+      } catch {
+        // Invalid JSON, treat as text
+      }
+    }
+
+    return linkify(message);
+  }
+
+  let formattedText = $derived(renderMessage(text));
+
+  function isOnlyEmojis(text: string): boolean {
+    // Remove spaces and check if all characters are emojis
+    const cleaned = text.replace(/\s/g, '');
+    if (cleaned.length === 0) return false;
+    
+    const regex = emojiRegex();
+    const matches = cleaned.match(regex);
+    
+    // Check if all characters in cleaned text are emojis
+    if (!matches) return false;
+    
+    // Count visual emojis (not UTF-16 code units)
+    const emojiCount = matches.length;
+    if (emojiCount > 3) return false;
+    
+    // Join all emoji matches and compare with cleaned text
+    const emojiOnly = matches.join('');
+    return emojiOnly === cleaned;
+  }
+
+  let isEmojiOnly = $derived(isSystem ? false : isOnlyEmojis(text));
 </script>
 
 <div class="message" class:own={isOwn} class:system={isSystem}>
   {#if !isSystem && showSender}
     <div class="sender">{sender}</div>
   {/if}
-  <div class="text">
+  <div class="text" class:emoji-only={isEmojiOnly}>
     {@html formattedText}
   </div>
 </div>
@@ -64,7 +123,7 @@
     background: white;
     padding: 10px 14px;
     border-radius: 12px;
-    display: inline-block;
+    display: inline-flex;
     max-width: 80%;
     word-wrap: break-word;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -91,6 +150,11 @@
     color: #764ba2;
   }
 
+  :global(.message .text:has(.gif)) {
+    padding: 0;
+    overflow: hidden;
+  }
+
   .message.system {
     text-align: center;
   }
@@ -100,5 +164,11 @@
     color: #1976d2;
     font-size: 13px;
     font-style: italic;
+  }
+
+  .message .text.emoji-only {
+    font-size: 2.5em;
+    padding: 15px 20px;
+    line-height: 1;
   }
 </style>

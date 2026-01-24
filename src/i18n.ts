@@ -43,6 +43,13 @@ const translations = {
     "chat.reconnecting": "Reconnexion...",
     "chat.connectionError": "Erreur de connexion",
     "chat.disconnected": "Déconnecté",
+
+    // GIF Picker
+    "gif.searchPlaceholder": "Rechercher un GIF...",
+    "gif.message": "Tapez pour rechercher un GIF !",
+    "gif.loading": "Chargement...",
+    "gif.noResults": "Aucun résultat",
+    "gif.error": "Erreur :",
   },
   en: {
     //Global
@@ -84,6 +91,13 @@ const translations = {
     "chat.reconnecting": "Reconnecting...",
     "chat.connectionError": "Connection error",
     "chat.disconnected": "Disconnected",
+
+    // GIF Picker
+    "gif.searchPlaceholder": "Search for a GIF...",
+    "gif.message": "Type to search for a GIF!",
+    "gif.loading": "Loading...",
+    "gif.noResults": "No results",
+    "gif.error": "Error:",
   },
 } as const;
 

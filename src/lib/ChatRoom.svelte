@@ -9,6 +9,8 @@
   } from "../emojiUtils";
   import { t } from "../i18n";
   import logo from "/logo.svg";
+  import GifPicker from "./GifPicker.svelte";
+  import type { TenorResult } from "../types";
 
   interface Props {
     roomId: string;
@@ -53,6 +55,12 @@
     onsendMessage(textWithEmojis);
     messageInput = "";
     showAutocomplete = false;
+  }
+
+  function handleSendGif(gifResult: TenorResult) {
+    if (!gifResult || !gifResult.gif) return;
+
+    onsendMessage(JSON.stringify({ type: "gif", content: gifResult }));
   }
 
   function handleKeyPress(event: KeyboardEvent) {
@@ -141,15 +149,6 @@
     }
   }
 
-  function scrollToBottom() {
-    if (messagesContainer) {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-      unreadCount = 0;
-      lastReadIndex = messages.length;
-      isAtBottom = true;
-    }
-  }
-
   function scrollToFirstUnread() {
     if (!messagesContainer || lastReadIndex >= messages.length) return;
 
@@ -179,11 +178,22 @@
   }
 
   $effect(() => {
-    if (messagesContainer) {
+    if (messagesContainer && messages.length > 0) {
       const previousLength = lastReadIndex;
+      const lastMessage = messages[messages.length - 1];
+      // Check if the message is a GIF (JSON string starting with {"type":"gif")
+      const hasGif = lastMessage.text.startsWith('{"type":"gif"');
 
       if (isAtBottom) {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        // If the message is a GIF, wait longer for the image to load
+        const scrollDelay = hasGif ? 300 : 0;
+        
+        setTimeout(() => {
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        }, scrollDelay);
+        
         lastReadIndex = messages.length;
       } else if (messages.length > previousLength) {
         unreadCount = messages.length - lastReadIndex;
@@ -267,6 +277,7 @@
         <div class="emoji-container">
           <EmojiPicker onemojiSelect={handleEmojiSelect} />
         </div>
+        <GifPicker onGifSelect={handleSendGif} />
         <button
           disabled={messageInput.trim() === ""}
           class="send-button"
@@ -311,7 +322,7 @@
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     width: 100%;
-    max-width: 600px;
+    max-width: 850px;
     overflow: hidden;
   }
 
@@ -439,6 +450,7 @@
 
   .btn-group {
     display: flex;
+    gap: 4px;
     width: 100%;
     padding: 8px;
     margin-top: 12px;
@@ -543,6 +555,7 @@
     }
 
     .peers-list {
+      flex-shrink: 0;
       margin-bottom: 10px;
       white-space: nowrap;
       overflow-x: auto;
